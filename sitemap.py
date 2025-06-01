@@ -97,6 +97,12 @@ def generate_sitemap_parts(page_data, output_file, site_base_url, split_limit):
     parsed_base_url = urlparse(site_base_url)
     sitemap_base_url = f"{parsed_base_url.scheme}://{parsed_base_url.netloc}/"
     output_prefix = os.path.splitext(os.path.basename(output_file))[0]
+    # If default output (sitemap_index.xml), use 'sitemap' as prefix for part files
+    if output_prefix == "sitemap_index":
+        part_prefix = "sitemap"
+    else:
+        part_prefix = output_prefix
+
     output_dir = os.path.dirname(output_file)
 
     image_seen = set()
@@ -107,17 +113,13 @@ def generate_sitemap_parts(page_data, output_file, site_base_url, split_limit):
         part_end = min(part_start + split_limit, num_urls)
         part_urls = urls[part_start:part_end]
 
-        if num_parts == 1:
-            part_filename = output_file
-            part_url = f"{sitemap_base_url}{os.path.basename(part_filename)}"
-        else:
-            part_filename = os.path.join(output_dir, f"{output_prefix}-{part_num + 1}.xml")
-            part_url = f"{sitemap_base_url}{os.path.basename(part_filename)}"
+        part_filename = os.path.join(output_dir, f"{part_prefix}-{part_num + 1}.xml")
+        part_url = f"{sitemap_base_url}{os.path.basename(part_filename)}"
 
         part_files.append(part_url)
 
         urlset = ET.Element("urlset", {"xmlns": "http://www.sitemaps.org/schemas/sitemap/0.9",
-            "xmlns:image": "http://www.google.com/schemas/sitemap-image/1.1"})
+                                       "xmlns:image": "http://www.google.com/schemas/sitemap-image/1.1"})
 
         xml_stylesheet = '<?xml-stylesheet type="text/xsl" href="/sitemap-style.xml" ?>\n'
 
