@@ -32,18 +32,23 @@ from bs4 import BeautifulSoup
 # ------------------------------------------------------------------------------
 # Helper: Pretty print XML (works on Python 3.9+)
 def indent_xml(elem, level=0, space="  "):
-    i = "\n" + level * space
+    indent = "\n" + (level * space)
+    child_indent = "\n" + ((level + 1) * space)
+
     if len(elem):
         if not elem.text or not elem.text.strip():
-            elem.text = i + space
+            elem.text = child_indent
         for child in elem:
             indent_xml(child, level + 1, space)
-        if not elem.tail or not elem.tail.strip():
-            elem.tail = i
+            if not child.tail or not child.tail.strip():
+                child.tail = child_indent
+        if not elem[-1].tail or not elem[-1].tail.strip():
+            elem[-1].tail = indent
     else:
-        if level and (not elem.tail or not elem.tail.strip()):
-            elem.tail = i
-
+        if not elem.text or not elem.text.strip():
+            elem.text = ''
+    if level and (not elem.tail or not elem.tail.strip()):
+        elem.tail = indent
 
 # ------------------------------------------------------------------------------
 def cleanup_old_parts(output_dir: Path, part_prefix, part_files_current):
