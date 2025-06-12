@@ -28,6 +28,7 @@ from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
+xml_stylesheet = '<?xml-stylesheet type="text/xsl" href="/sitemap-style.xml" ?>\n'
 
 # ------------------------------------------------------------------------------
 # Helper: Pretty print XML (works on Python 3.9+)
@@ -168,8 +169,6 @@ def generate_sitemap_parts(page_data, output_path: Path, site_base_url, split_li
             "xmlns:image": "http://www.google.com/schemas/sitemap-image/1.1"
         })
 
-        xml_stylesheet = '<?xml-stylesheet type="text/xsl" href="/sitemap-style.xml" ?>\n'
-
         part_image_seen = set()
 
         for page_url, (lastmod_date, image_urls) in part_urls:
@@ -201,7 +200,6 @@ def generate_sitemap_parts(page_data, output_path: Path, site_base_url, split_li
 
         with part_filename.open("w", encoding="utf-8") as f:
             f.write('<?xml version="1.0" encoding="utf-8"?>\n')
-            f.write('<?xml-stylesheet type="text/xsl" href="/sitemap-style.xml" ?>\n')
             f.write(xml_stylesheet)
             tree.write(f, encoding="unicode")
 
@@ -237,6 +235,7 @@ def generate_sitemap_index(part_files, output_dir: Path, site_base_url):
     with index_filename.open("w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n')
         f.write('<?xml-stylesheet type="text/xsl" href="/sitemap-style.xml" ?>\n')
+        f.write(xml_stylesheet)
         tree.write(f, encoding="unicode")
 
     print()
