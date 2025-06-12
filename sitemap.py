@@ -234,7 +234,6 @@ def generate_sitemap_index(part_files, output_dir: Path, site_base_url):
 
     with index_filename.open("w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n')
-        f.write('<?xml-stylesheet type="text/xsl" href="/sitemap-style.xml" ?>\n')
         f.write(xml_stylesheet)
         tree.write(f, encoding="unicode")
 
