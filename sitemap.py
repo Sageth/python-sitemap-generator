@@ -28,7 +28,7 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 
 xml_stylesheet = '<?xml-stylesheet type="text/xsl" href="/sitemap-style.xsl" ?>\n'
-VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov"}
+VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov", ".wmv"}
 HTML_EXTENSIONS = {".htm", ".html"}
 
 def indent_xml(elem, level=0, space="  "):
