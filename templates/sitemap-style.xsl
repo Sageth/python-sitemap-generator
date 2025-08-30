@@ -97,7 +97,7 @@
                                 </td>
                                 <xsl:if test="sitemap:lastmod">
                                     <td class="pa3 tr bb b--silver">
-                                        <xsl:value-of select="concat(substring(sitemap:lastmod, 0, 11), concat(' ', substring(sitemap:lastmod, 12, 5)), concat(' ', substring(sitemap:lastmod, 20, 6)))"/>
+                                        <xsl:value-of select="sitemap:lastmod"/>
                                     </td>
                                 </xsl:if>
                                 <xsl:apply-templates/>
@@ -154,7 +154,7 @@
                                 <xsl:apply-templates select="sitemap:priority"/>
                                 <xsl:if test="sitemap:lastmod">
                                     <td class="pa3 tr bb b--silver">
-                                        <xsl:value-of select="concat(substring(sitemap:lastmod, 0, 11), concat(' ', substring(sitemap:lastmod, 12, 5)), concat(' ', substring(sitemap:lastmod, 20, 6)))"/>
+                                        <xsl:value-of select="sitemap:lastmod"/>
                                     </td>
                                 </xsl:if>
                             </tr>
