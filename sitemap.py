@@ -22,6 +22,7 @@ from tqdm import tqdm
 VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov", ".wmv"}
 HTML_EXTENSIONS = {".htm", ".html"}
 XML_STYLESHEET = '<?xml-stylesheet type="text/xsl" href="/sitemap-style.xsl" ?>\n'
+split_count = 1000
 
 
 def write_url_element(f, page_url, lastmod_date, image_urls, video_data, image_seen, video_seen):
@@ -52,7 +53,7 @@ def write_url_element(f, page_url, lastmod_date, image_urls, video_data, image_s
     f.write("  </url>\n")
 
 
-def generate_sitemap_parts_streamed(html_files, site_base_url, output_dir, site_root, split_limit=1000):
+def generate_sitemap_parts_streamed(html_files, site_base_url, output_dir, site_root, split_limit=split_count):
     output_dir = Path(output_dir).resolve()
     site_root = Path(site_root).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -170,7 +171,7 @@ def main():
     parser.add_argument("--site_base_url", required=True, help="Base URL of the site")
     parser.add_argument("--site_root", required=True, help="Path to site's HTML files")
     parser.add_argument("--output", default="sitemap_index.xml", help="Output sitemap index filename")
-    parser.add_argument("--split", type=int, default=1000, help="Max URLs per sitemap part")
+    parser.add_argument("--split", type=int, default=split_count, help="Max URLs per sitemap part")
     args = parser.parse_args()
 
     site_root_path = Path(args.site_root).resolve()
