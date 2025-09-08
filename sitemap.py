@@ -9,12 +9,14 @@ Memory-efficient sitemap generator
 """
 
 import argparse
+import re
+import xml.etree.ElementTree as eTree
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
+from xml.dom import minidom
+
 from bs4 import BeautifulSoup
-import xml.etree.ElementTree as eTree
-import re
 from tqdm import tqdm
 
 VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov", ".wmv"}
@@ -50,8 +52,9 @@ def write_url_element(f, page_url, lastmod_date, image_urls, video_data, image_s
     f.write("  </url>\n")
 
 
-def generate_sitemap_parts_streamed(html_files, site_base_url, output_dir, split_limit=1000):
+def generate_sitemap_parts_streamed(html_files, site_base_url, output_dir, site_root, split_limit=1000):
     output_dir = Path(output_dir).resolve()
+    site_root = Path(site_root).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     part_files = []
@@ -62,7 +65,7 @@ def generate_sitemap_parts_streamed(html_files, site_base_url, output_dir, split
     part_count = 0
 
     for file_path in tqdm(html_files, desc="Processing HTML files"):
-        if urls_in_part == 0 or urls_in_part >= split_limit:
+        if part_file is None or urls_in_part >= split_limit:
             if part_file:
                 part_file.write("</urlset>\n")
                 part_file.close()
@@ -77,8 +80,9 @@ def generate_sitemap_parts_streamed(html_files, site_base_url, output_dir, split
             urls_in_part = 0
             part_files.append(part_file_path)
 
-        rel_path = file_path.relative_to(html_files[0].parents[1])
-        page_url = urljoin(site_base_url, rel_path.as_posix())
+        # Make relative path from site_root, not first HTML file
+        rel_path = file_path.relative_to(site_root)
+        page_url = urljoin(site_base_url.rstrip("/") + "/", rel_path.as_posix())
         mtime = file_path.stat().st_mtime
         lastmod_date = datetime.fromtimestamp(mtime, tz=timezone.utc).replace(microsecond=0).astimezone().isoformat()
 
@@ -131,18 +135,23 @@ def generate_sitemap_index(part_files, output_dir: Path, site_base_url):
     index_filename = output_dir / "sitemap_index.xml"
 
     sitemapindex = eTree.Element("sitemapindex", {"xmlns": "http://www.sitemaps.org/schemas/sitemap/0.9"})
-    now = datetime.now(timezone.utc).astimezone().isoformat()
+    now = datetime.now(timezone.utc).replace(microsecond=0).astimezone().isoformat()
 
     for part_path in part_files:
         sitemap_elem = eTree.SubElement(sitemapindex, "sitemap")
         eTree.SubElement(sitemap_elem, "loc").text = urljoin(sitemap_base_url, part_path.name)
         eTree.SubElement(sitemap_elem, "lastmod").text = now
 
-    tree = eTree.ElementTree(sitemapindex)
+    # Serialize and pretty-print
+    rough_string = eTree.tostring(sitemapindex, encoding="utf-8")
+    reparsed = minidom.parseString(rough_string)
+    pretty_xml = reparsed.toprettyxml(indent="  ")
+
     with index_filename.open("w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n')
         f.write(XML_STYLESHEET)
-        tree.write(f, encoding="unicode")
+        # Strip the duplicate declaration from minidom output
+        f.write("\n".join(pretty_xml.splitlines()[1:]))
 
     return index_filename, urljoin(sitemap_base_url, index_filename.name)
 
@@ -175,7 +184,11 @@ def main():
 
     # Generate sitemap parts (streamed)
     part_files, image_seen, video_seen = generate_sitemap_parts_streamed(
-        html_files, args.site_base_url, output_path.parent, split_limit=args.split
+        html_files,
+        args.site_base_url,
+        output_path.parent,
+        site_root_path,
+        split_limit=args.split
     )
 
     # Cleanup old parts
