@@ -26,6 +26,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 xml_stylesheet = '<?xml-stylesheet type="text/xsl" href="/sitemap-style.xsl" ?>\n'
 VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov", ".wmv"}
@@ -51,20 +52,25 @@ def indent_xml(elem, level=0, space="  "):
 
 def scan_html_files(site_root, site_base_url):
     page_data = {}
-    html_file_count = 0
     site_root_path = Path(site_root).resolve()
     print(f"Scanning: {site_root_path}")
-    for file_path in site_root_path.rglob('*'):
-        if file_path.suffix.lower() not in HTML_EXTENSIONS:
-            continue
-        html_file_count += 1
+
+    # Gather all HTML files first
+    html_files = [f for f in site_root_path.rglob('*') if f.suffix.lower() in HTML_EXTENSIONS]
+    html_file_count = len(html_files)
+
+    # Wrap loop in tqdm
+    for file_path in tqdm(html_files, desc="Processing HTML files", unit="file"):
         rel_path = file_path.relative_to(site_root_path)
         page_url = urljoin(site_base_url, rel_path.as_posix())
         mtime = file_path.stat().st_mtime
         lastmod_date = datetime.fromtimestamp(mtime, tz=timezone.utc).astimezone().isoformat()
-        with file_path.open("r", encoding="utf-8", errors="ignore") as f:
-            html = f.read()
-        soup = BeautifulSoup(html, "html.parser")
+        try:
+            html = file_path.read_text(encoding="utf-8", errors="ignore")
+        except Exception as e:
+            print(f"⚠️ Failed to read {file_path}: {e}")
+            continue
+        soup = BeautifulSoup(html, "lxml")
         img_tags = soup.find_all("img")
         video_tags = soup.find_all("video")
         image_urls = set()
@@ -90,7 +96,9 @@ def scan_html_files(site_root, site_base_url):
             desc = video_tag.get("description") or video_tag.get("data-description") or title
             video_data.append((video_url, title, desc))
         page_data[page_url] = (lastmod_date, image_urls, video_data)
+
     return html_file_count, page_data
+
 
 def generate_sitemap_parts(page_data, output_path: Path, site_base_url, split_limit):
     urls = list(page_data.items())
