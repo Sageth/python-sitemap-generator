@@ -110,7 +110,7 @@
     </xsl:template>
 
     <xsl:template match="sitemap:urlset">
-        <div class="mw8 center">
+        <div class="w-90 center">
             <div class="overflow-auto">
                 <table class="w-100 f6 b--silver ba bw1" cellspacing="0">
                     <thead class="bg-silver">

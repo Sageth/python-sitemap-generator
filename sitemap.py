@@ -89,7 +89,20 @@ def generate_sitemap_parts_streamed(html_files, site_base_url, output_dir, site_
 
         html = file_path.read_text(encoding="utf-8", errors="ignore")
         soup = BeautifulSoup(html, "lxml")
-        image_urls = {urljoin(page_url, img.get("src")) for img in soup.find_all("img") if img.get("src")}
+        image_urls = set()
+        for img in soup.find_all("img"):
+            src = img.get("src")
+            if not src:
+                continue
+            src = src.strip()
+            # Skip absolute URLs and data URIs
+            if src.startswith(("http://", "https://", "//", "data:")):
+                image_urls.add(src)
+            else:
+                # Normalize and prepend your new domain
+                normalized_src = src.lstrip("./")  # remove leading ./ or /
+                full_url = urljoin("https://assets.dvrbs.camdenhistory.com/", normalized_src)
+                image_urls.add(full_url)
 
         video_data = []
         for video_tag in soup.find_all("video"):
