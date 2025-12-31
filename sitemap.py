@@ -136,11 +136,11 @@ def cleanup_old_parts(output_dir: Path, part_prefix, part_files_current):
                 removed_count += 1
                 print(f"🗑️ Deleted old part file: {file_path}")
             except Exception as e:
-                print(f"⚠️ Error deleting {file_path}: {e}")
+                print(f"Error deleting {file_path}: {e}")
     if removed_count == 0:
-        print("✅ No old part files found.")
+        print("No old part files found.")
     else:
-        print(f"✅ Removed {removed_count} old part file(s).")
+        print(f"Removed {removed_count} old part file(s).")
 
 
 def generate_sitemap_index(part_files, output_dir: Path, site_base_url):
@@ -174,9 +174,9 @@ def copy_stylesheet_to_site(site_root: Path, stylesheet_src: Path):
     destination = site_root / "sitemap-style.xsl"
     try:
         destination.write_text(stylesheet_src.read_text(encoding="utf-8"), encoding="utf-8")
-        print(f"✅ Copied sitemap stylesheet to: {destination}")
+        print(f"Copied sitemap stylesheet to: {destination}")
     except Exception as e:
-        print(f"⚠️ Failed to copy stylesheet: {e}")
+        print(f"Failed to copy stylesheet: {e}")
 
 
 def main():
@@ -217,7 +217,7 @@ def main():
     copy_stylesheet_to_site(site_root_path, script_dir / "templates/sitemap-style.xsl")
 
     # Summary
-    print(f"\n📄 Sitemap index: {index_file}")
+    print(f"\nSitemap index: {index_file}")
     print(f"  Sitemap parts: {len(part_files)}")
     print(f"  Unique images: {len(image_seen)}")
     print(f"  Unique videos: {len(video_seen)}")
