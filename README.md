@@ -1,6 +1,6 @@
 # Static Sitemap Generator
 
-Enterprise-grade static sitemap generator for HTML websites.
+Static sitemap generator for HTML websites.
 
 Features:
 - Auto-splits large sitemaps (default 25k URLs per part)
