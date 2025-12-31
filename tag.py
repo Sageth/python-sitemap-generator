@@ -25,7 +25,7 @@ for dirpath, _, filenames in os.walk(root_dir):
                 with open(filepath, "r", encoding="utf-8") as f:
                     soup = BeautifulSoup(f, "html.parser")
             except Exception as e:
-                print(f"⚠️ Skipping {filepath}: {e}")
+                print(f"Skipping {filepath}: {e}")
                 error_count += 1
                 continue
 
@@ -91,8 +91,8 @@ for dirpath, _, filenames in os.walk(root_dir):
 
 # Summary
 print("\n--- Summary ---")
-print(f"✅ Added:   {added_count}")
-print(f"🔧 Updated: {updated_count}")
-print(f"⏭️  Skipped: {skipped_count}")
-print(f"⚠️  No <head>: {nohead_count}")
-print(f"❌ Errors:  {error_count}")
+print(f"Added:   {added_count}")
+print(f"Updated: {updated_count}")
+print(f"Skipped: {skipped_count}")
+print(f"No <head>: {nohead_count}")
+print(f"Errors:  {error_count}")
